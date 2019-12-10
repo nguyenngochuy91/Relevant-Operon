@@ -1,10 +1,12 @@
-# ROAGUE: **R**econstruction **o**f **A**ncestral **G**ene Blocks **U**sing **E**vents
+# RGB: **R**elevant **G**ene **B**lock
 ## Purpose
 
-ROAGUE is a tool to reconstruct ancestors of gene blocks in prokaryotic genomes. Gene blocks are genes co-located on the chromosome. In many cases, gene blocks are conserved between bacterial species, sometimes as operons, when genes are co-transcribed. The conservation is rarely absolute: gene loss, gain, duplication, block splitting and block fusion are frequently observed. 
+RGB is a tool to find orthologous gene block to a reference gene block in projaryotic genomes. Gene blocks are genes co-located on the chromosome. In many cases, gene blocks are conserved between bacterial species, sometimes as operons, when genes are co-transcribed. The conservation is rarely absolute: gene loss, gain, duplication, block splitting and block fusion are frequently observed. 
 
-ROAGUE accepts a set of species and a gene block in a reference species. It then finds all gene blocks, orhtologous to the reference gene blocks, and reconsructs their ancestral states.
+RGB accepts a set of species and a gene block in a reference species. It then finds all gene blocks, orhtologous to the reference gene blocks.
 
+RGB provides 2 method to find relevant gene block, naive method and approximated method. Naive method tries to exhaustively search all the combination, and 
+approximated using greedy method that has an approximation result. 
 ## Requirements
 * [Wget](https://www.gnu.org/software/wget/) 
 * [Conda](https://conda.io/miniconda.html) (package manager so we don't have to use sudo)
@@ -19,9 +21,9 @@ ROAGUE accepts a set of species and a gene block in a reference species. It then
 ## Installation
 Users can either use github interface Download button or type the following command in command line (assumming `git` was installed):
 ```bash
-git clone https://github.com/nguyenngochuy91/Ancestral-Blocks-Reconstruction
+git clone https://github.com/nguyenngochuy91/Relevant-Operon.git
 ```
-Install Miniconda (you can either export the path everytime you use ROAGUE, or add it to the .bashrc file). Before using
+Install Miniconda (you can either export the path everytime you use RGB, or add it to the .bashrc file). Before using
 the following command line, users will need to install [Wget](https://www.gnu.org/software/wget/). 
 ```bash
 wget http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O Miniconda-latest-Linux-x86_64.sh
@@ -29,7 +31,7 @@ bash Miniconda-latest-Linux-x86_64.sh -b -p ~/anaconda_ete/
 export PATH=~/anaconda_ete/bin:$PATH;
 conda update conda
 ```
-We are going to create an environment to run **ROAGUE**, replace `myenv` with your preference of environment name. 
+We are going to create an environment to run **RGB**, replace `myenv` with your preference of environment name. 
 ```bash
 conda create --name myenv
 ```
@@ -58,18 +60,33 @@ For PDA, check installation instructions on this website: [PDA](http://www.cibiv
 
 ## Usage
 
-The easiest way to run the project is to execute the script [ROAGUE](https://github.com/nguyenngochuy91/Ancestral-Blocks-Reconstruction/blob/master/roague.py), which is inside the directory [Ancestral-Blocks-Reconstruction]. 
+The easiest way to run the project is to execute the script [RGB](https://github.com/nguyenngochuy91/Relevant-Operon/blob/master/relevantOperon.py), which is inside the directory [Relevant-Operon]. 
 
 ### Run on example datasets
-The users can run this script on the example data sets provided in directory [E_Coli](https://github.com/nguyenngochuy91/Ancestral-Blocks-Reconstruction/tree/master/E_Coli) and [B_Sub](https://github.com/nguyenngochuy91/Ancestral-Blocks-Reconstruction/tree/master/B_Sub). The two following command lines will run [roague](https://github.com/nguyenngochuy91/Ancestral-Blocks-Reconstruction/blob/master/roague.py) on our 2 directories. The final results (pdf files of our ancestral reconstructions) are stored in `result/E_Coli/visualization` and `result/B_Sub/visualization` directory by default.
+The users can run this script on the example data sets provided in directory [E_Coli](https://github.com/nguyenngochuy91/Relevant-Operon/tree/master/E_Coli) and [B_Sub](https://github.com/nguyenngochuy91/Relevant-Operon/tree/master/B_Sub). The two following command lines will run [relevantOperon](https://github.com/nguyenngochuy91/Relevant-Operon/blob/master/relevantOperon.py) on our 2 directories. 
+The final results (visualization files) are stored in folder name that user choose (result_naive, and result_approx in the example)
 #### E_Coli
+
+Using naive method
 ```bash
-./roague.py -g E_Coli/genomes/ -b E_Coli/gene_block_names_and_genes.txt -r NC_000913 -f E_Coli/phylo_order.txt -m global
+./relevantOperon.py -g E_Coli/genomes/ -b E_Coli/gene_block_names_and_genes.txt -r NC_000913 -f E_Coli/phylo_order.txt -o result_naive -a N
+```
+
+Using approximated method
+```bash
+./relevantOperon.py -g E_Coli/genomes/ -b E_Coli/gene_block_names_and_genes.txt -r NC_000913 -f E_Coli/phylo_order.txt -o result_approx -a Y
 ```
 
 #### B_Sub
+
+Using naive method
 ```bash
-./roague.py -g B_Sub/genomes/ -b B_Sub/gene_block_names_and_genes.txt -r NC_000964 -f B_Sub/phylo_order.txt -m global
+./relevantOperon.py -g B_Sub/genomes/ -b B_Sub/gene_block_names_and_genes.txt -r NC_000964 -f B_Sub/phylo_order.txt -o result_naive -a N
+```
+
+Using approximated method
+```bash
+./relevantOperon.py -g B_Sub/genomes/ -b B_Sub/gene_block_names_and_genes.txt -r NC_000964 -f B_Sub/phylo_order.txt -o result_approx -a N
 ```
 ### Run on users' specific datasets
 If the users wants to run the program on their own datasets, then they have to provide the following inputs:
@@ -82,14 +99,14 @@ caiTABCDE	caiA	caiE	caiD	caiC	caiB	caiT
 casABCDE12	casE	casD	casA	casC	casB	cas1	cas2
 chbBCARFG	chbG	chbF	chbC	chbB	chbA	chbR
 ``` 
-   3. Run ROAGUE, the output is stored in directory `result`.
+   3. Run RGB, the output is stored in directory `result`.
   ```bash
-  ./roague.py -g genomes_directory -b gene_block_names_and_genes.txt -r ref_accession -m global -o result
+  ./relevantOperon.py -g genomes_directory -b gene_block_names_and_genes.txt -r ref_accession -a Y -o result
   ```
   ```
-  usage: roague.py [-h] [--genomes_directory GENOMES_DIRECTORY]
-                 [--gene_blocks GENE_BLOCKS] [--reference REFERENCE]
-                 [--filter FILTER] [--method METHOD] [--output OUTPUT]
+usage: relevantOperon.py [-h] [--genomes_directory GENOMES_DIRECTORY]
+                         [--gene_blocks GENE_BLOCKS] [--reference REFERENCE]
+                         [--filter FILTER] [--output OUTPUT] [--approx APPROX]
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -97,8 +114,8 @@ optional arguments:
                         The directory that store all the genomes file
                         (E_Coli/genomes)
   --gene_blocks GENE_BLOCKS, -b GENE_BLOCKS
-                        The gene_block_names_and_genes.txt file, this file
-                        stores the operon name and its set of genes
+                        The E_Coli/gene_block_names_and_genes.txt file, this
+                        file stores the operon name and its set of genes
   --reference REFERENCE, -r REFERENCE
                         The ncbi accession number for the reference genome
                         (NC_000913 for E_Coli and NC_000964 for B_Sub)
@@ -106,11 +123,11 @@ optional arguments:
                         The filter file for creating the tree
                         (E_Coli/phylo_order.txt for E_Coli or
                         B_Sub/phylo_order.txt for B-Sub)
-  --method METHOD, -m METHOD
-                        The method to reconstruc ancestral gene block, we
-                        support either global or local
   --output OUTPUT, -o OUTPUT
                         Output directory to store the result
+  --approx APPROX, -a APPROX
+                        Using approx method (Y,N)
+
 
   ```
    
@@ -159,9 +176,9 @@ optional arguments:
                         to include the reference species
 
    ```
-   3. Run ROAGUE,  the output is stored in directory `result`. 
+   3. Run RGB,  the output is stored in directory `result`. 
   ```bash
-  ./roague.py -g genomes_directory -b gene_block_names_and_genes.txt -r ref_accession -f phylo_order.txt -m global -o result
+  ./relevantOperon.py -g genomes_directory -b gene_block_names_and_genes.txt -r ref_accession -f phylo_order.txt -a Y -o result
   ```
 
 
@@ -174,14 +191,14 @@ Here are two gene blocks that were generated through our program.
 
 This gene block codes for genes involved in the catabolism of phenylacetate and it is not conserved between the group of studied bacteria.
 
-![paaABCDEFGHIJK](https://github.com/nguyenngochuy91/Ancestral-Blocks-Reconstruction/blob/master/paa_global_edit.png "Gene block paaABCDEFGHIJK")
+![paaABCDEFGHIJK](https://github.com/nguyenngochuy91/Relevant-Operon/blob/master/paaABCDEFGHIJK.png "Gene block paaABCDEFGHIJK")
 2. Gene block atpIBEFHAGDC:
 
 This gene block catalyzes the synthesis of ATP from ADP and inorganic phosphate and it is very conserved between the group of studied bacteria.
 
-![atpIBEFHAGDC](https://github.com/nguyenngochuy91/Ancestral-Blocks-Reconstruction/blob/master/atp_global_edit.png "Gene block atpIBEFHAGDC")
+![atpIBEFHAGDC](https://github.com/nguyenngochuy91/Relevant-Operon/blob/master/atpIBEFHAGDC.png "Gene block atpIBEFHAGDC")
 ## Credits
-1. http://bioinformatics.oxfordjournals.org/content/early/2015/04/13/bioinformatics.btv128.full 
-2. https://doi.org/10.1093/bioinformatics/btz053
+1. [An event-driven approach for studying gene block evolution in bacteria](http://bioinformatics.oxfordjournals.org/content/early/2015/04/13/bioinformatics.btv128.full)
+2. [Tracing the ancestry of operons in bacteria](https://academic.oup.com/bioinformatics/article/35/17/2998/5300000)
 
 
