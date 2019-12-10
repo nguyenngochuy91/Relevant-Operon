@@ -15,7 +15,7 @@ def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--naiveInput","-n",help="naive directory (either time or result)",default ="result_naive/E_Coli/" )
     parser.add_argument("--approxInput","-a",help="aprrox directory (either time or result)",default = "result_approx/E_Coli/")
-    parser.add_argument("--geneBlock","-g",help="gene_block_names_and_genes.txt file",default = "./E_Coli/gene_block_names_and_genes.txt")
+    parser.add_argument("--geneBlock","-b",help="gene_block_names_and_genes.txt file",default = "./E_Coli/gene_block_names_and_genes.txt")
 #    parser.add_argument("--isTime","-t",help="making graph for time (Y or N)",default = "N") 
 #    parser.add_argument("--isReconstruction","-r",help="making graph for reconstruction (Y or N)",default = "N")  
 #    parser.add_argument("-o", "--output", default='graph',
