@@ -64,7 +64,7 @@ The easiest way to run the project is to execute the script [RGB](https://github
 
 ### Run on example datasets
 The users can run this script on the example data sets provided in directory [E_Coli](https://github.com/nguyenngochuy91/Relevant-Operon/tree/master/E_Coli) and [B_Sub](https://github.com/nguyenngochuy91/Relevant-Operon/tree/master/B_Sub). The two following command lines will run [relevantOperon](https://github.com/nguyenngochuy91/Relevant-Operon/blob/master/relevantOperon.py) on our 2 directories. 
-The final results (visualization files) are stored in folder name that user choose (result_naive, and result_approx in the example)
+The final results (visualization files) are stored in folder name that user choose (*result_naive*, and *result_approx* in the example)
 #### E_Coli
 
 Using naive method
@@ -76,6 +76,29 @@ Using approximated method
 ```bash
 ./relevantOperon.py -g E_Coli/genomes/ -b E_Coli/gene_block_names_and_genes.txt -r NC_000913 -f E_Coli/phylo_order.txt -o result_approx -a Y
 ```
+
+We can then execute the script [analyze](https://github.com/nguyenngochuy91/Relevant-Operon/blob/master/analyze.py) to compare the runtime, deletion, duplication and split count
+of our 2 method. The result is store in folder *analysis*, it contains file: Time(log10)Plot.png (running time in log10 scale), 3 graph file for pairwise event count, 3 graph file for event count versus reference gene block.
+```bash
+./analyze.py -n result_naive/E_Coli/ -a result_approx/E_Coli/ -b ./E_Coli/gene_block_names_and_genes.txt
+```
+```
+usage: analyze.py [-h] [--naiveInput NAIVEINPUT] [--approxInput APPROXINPUT]
+                  [--geneBlock GENEBLOCK]
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --naiveInput NAIVEINPUT, -n NAIVEINPUT
+                        naive directory (either time or result)
+  --approxInput APPROXINPUT, -a APPROXINPUT
+                        aprrox directory (either time or result)
+  --geneBlock GENEBLOCK, -b GENEBLOCK
+                        gene_block_names_and_genes.txt file
+
+```
+
+
+
 
 #### B_Sub
 
@@ -197,8 +220,10 @@ This gene block codes for genes involved in the catabolism of phenylacetate and 
 This gene block catalyzes the synthesis of ATP from ADP and inorganic phosphate and it is very conserved between the group of studied bacteria.
 
 ![atpIBEFHAGDC](https://github.com/nguyenngochuy91/Relevant-Operon/blob/master/atpIBEFHAGDC.png "Gene block atpIBEFHAGDC")
+
+
+
 ## Credits
 1. [An event-driven approach for studying gene block evolution in bacteria](http://bioinformatics.oxfordjournals.org/content/early/2015/04/13/bioinformatics.btv128.full)
 2. [Tracing the ancestry of operons in bacteria](https://academic.oup.com/bioinformatics/article/35/17/2998/5300000)
-
 
