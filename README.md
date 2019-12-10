@@ -16,6 +16,7 @@ approximated using greedy method that has an approximation result.
 * [Muscle Alignment](https://www.drive5.com/muscle/downloads.htm)
 * [BLAST+](https://blast.ncbi.nlm.nih.gov/Blast.cgi?PAGE_TYPE=BlastDocs&DOC_TYPE=Download)
 * [ETE3](http://etetoolkit.org/download/) (python framework for tree)
+* [Mathplotlib](https://matplotlib.org/3.1.1/users/installing.html)
 * [PDA](http://www.cibiv.at/software/pda/#download) (optional if you want to debias your tree base on Phylogenetic Diversity)
 
 ## Installation
