@@ -56,6 +56,11 @@ Install BLAST, ClustalW, MUSCLE
 conda install -c bioconda blast clustalw muscle
 ```
 
+Install mathplotlib
+```basg
+conda install -c conda-forge matplotlib
+```
+
 For PDA, check installation instructions on this website: [PDA](http://www.cibiv.at/software/pda/#download)
 
 ## Usage
