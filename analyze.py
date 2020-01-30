@@ -66,6 +66,7 @@ def computePairWiseDistance(dictionary,geneSet):
     pairWiseDistance = [0,0,0]
     distance = [0,0,0]
     myList   = list(dictionary.keys())
+#    print (dictionary)
     for i in range(len(myList)-1):
         currentGeneBlock = dictionary[myList[i]]
         numBlock = len(currentGeneBlock.split("|"))    
@@ -74,8 +75,10 @@ def computePairWiseDistance(dictionary,geneSet):
             genes.remove("|")
         except:
             pass
-        distance[0] += len(geneSet)-len(genes)
-        distance[2] += abs(numBlock-1)
+        deletion = len(geneSet)-len(genes)
+        split    = abs(numBlock-1)
+        distance[0] += deletion
+        distance[2] += split
         for j in range(i+1,len(myList)):
             nextGeneBlock =dictionary[myList[j]]
             deletion     = computeDeletion(currentGeneBlock,nextGeneBlock)
@@ -152,7 +155,7 @@ def drawOne(x,operonName,dictionary,name,index,indices,isTime,directory):
     plt.scatter(x, approxData, s=20,c="b",label="Approx")
         
 #    plt.plot(x, differences, 'g-o',label="Differences")
-    print (differences)
+#    print (differences)
 #        plt.plot(operonName, geneData, 'g-o',label="Rep3")
     plt.xlabel('Operon Name')
     plt.ylabel(name)
@@ -197,8 +200,12 @@ def drawDifference(x,operonName,dictionary,name,index,indices,isTime,directory):
         naiveData  = np.log10([dictionary[operon]["naive"] for operon in operonName])
         approxData = np.log10([dictionary[operon]["approx"] for operon in operonName])    
     differences =[]
+    info = []
     for i in range(len(naiveData)):
         differences.append(naiveData[i]-approxData[i])
+        info.append([operonName[i],naiveData[i]-approxData[i]])
+    print (info)
+    print ()
     # change xticks
     geneIndices = sorted(indices.keys())
     flipD =  {}
@@ -242,6 +249,57 @@ def drawDifference(x,operonName,dictionary,name,index,indices,isTime,directory):
         plt.savefig(directory+"/{}DifferencesPlot".format(name),bbox_inches='tight',quality=100,dpi=500)
     else:
         plt.savefig(directory+"/{}DifferencesPlot".format(name),bbox_inches='tight',quality=100,dpi=500)
+    return differences
+    
+#
+def drawDifferenceSum(x,operonName,dictionary,name,index,indices,isTime,directory,differences):
+    plt.figure()
+    plt.title(name.split()[0]+"SumDifferences")
+    # change xticks
+    geneIndices = sorted(indices.keys())
+    flipD =  {}
+    for gene in geneIndices:
+        flipD[indices[gene]] = gene
+    plt.xticks(x,["{} ({})".format(operonName[i][:3],flipD[i]) if i in flipD else operonName[i][:3]  for i in range(len(operonName))],rotation='vertical',fontsize = 10)
+    plt.axvline(x=indices[geneIndices[0]],color='k',label = "Number of genes in the operon")
+    for i in geneIndices[1:]:
+        plt.axvline(x=indices[i],color='k')
+    plt.scatter(x, differences, s= 20,c="black",label="Differences(Naive - Approx)")
+        
+#    plt.plot(x, differences, 'g-o',label="Differences")
+#    print (differences)
+#        plt.plot(operonName, geneData, 'g-o',label="Rep3")
+    plt.xlabel('Operon Name')
+    plt.ylabel(name)
+    # Place a legend to the right of the plot
+    plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0.)
+    # resize the plot
+    
+    plt.xticks(range(len(dictionary))) # add loads of ticks
+    plt.grid()
+    
+    plt.gca().margins(x=0)
+    plt.gcf().canvas.draw()
+    tl = plt.gca().get_xticklabels()
+    maxsize = max([t.get_window_extent().width for t in tl])
+    m = 0.2 # inch margin
+    s = maxsize/plt.gcf().dpi*len(dictionary)+2*(m+1)
+    margin = m/plt.gcf().get_size_inches()[0]
+    
+    plt.gcf().subplots_adjust(left=margin, right=1.-margin)
+    plt.gcf().set_size_inches(s, plt.gcf().get_size_inches()[1])        
+    
+    # Pad margins so that markers don't get clipped by the axes
+    plt.margins(0.1)
+    # Tweak spacing to prevent clipping of tick-labels
+    plt.subplots_adjust(bottom=0.1)
+    # save somewhere we want lol
+    if isTime=="Y":
+        plt.savefig(directory+"/{}SumDifferencesPlot".format(name),bbox_inches='tight',quality=100,dpi=500)
+    else:
+        plt.savefig(directory+"/{}SumDifferencesPlot".format(name),bbox_inches='tight',quality=100,dpi=500)
+
+    
 # given dictionary, draw out figures 
 def drawAll(dictionary,isTime,directory,field):
     x = [i for i in range(len(dictionary))]
@@ -253,11 +311,16 @@ def drawAll(dictionary,isTime,directory,field):
 #    print (indices)
     if not isTime:
         graphName  = ["DeletionEvents","DuplicationEvents","SplitEvents"]
+        differences = [0]*len(operonName)
         # plot with color, and legend
         # plot the deletion cost
         for index in range(3):
             drawOne(x,operonName,dictionary,field+graphName[index],index,indices,isTime,directory)
-            drawDifference(x,operonName,dictionary,field+graphName[index],index,indices,isTime,directory)
+            dif = drawDifference(x,operonName,dictionary,field+graphName[index],index,indices,isTime,directory)
+#            print (320,dif)
+            for i in range(len(operonName)):
+                differences[i]+=dif[i]
+        drawDifferenceSum(x,operonName,dictionary,"reference",index,indices,isTime,directory,differences)
     else:
         drawOne(x,operonName,dictionary,"Time(log10)",None,indices,isTime,directory)
         drawDifference(x,operonName,dictionary,"Time(log10)",None,indices,isTime,directory)
