@@ -62,7 +62,7 @@ if __name__ == "__main__":
         accession = line[0]
         block = line[1]
         geneBlocks[accession] = block
-    print (geneBlocks)
+#    print (geneBlocks)
     color_list=['green','cyan','magenta','gray','yellow','orange',
                'red','lime','pink','blue','silver','maroon','mediumblue','plum']
     gene_color_dic = {}

@@ -18,7 +18,7 @@ approximated using greedy method that has an approximation result.
 * [ETE3](http://etetoolkit.org/download/) (python framework for tree)
 * [Mathplotlib](https://matplotlib.org/3.1.1/users/installing.html)
 * [PDA](http://www.cibiv.at/software/pda/#download) (optional if you want to debias your tree base on Phylogenetic Diversity)
-
+* [PuLP](https://pypi.org/project/PuLP/) (LP modeler written in python)
 ## Installation
 Users can either use github interface Download button or type the following command in command line (assumming `git` was installed):
 ```bash
@@ -58,10 +58,14 @@ conda install -c bioconda blast clustalw muscle
 ```
 
 Install mathplotlib
-```basg
+```bash
 conda install -c conda-forge matplotlib
 ```
 
+Install PuLP
+```bash
+conda install -c conda-forge pulp
+```
 For PDA, check installation instructions on this website: [PDA](http://www.cibiv.at/software/pda/#download)
 
 ## Usage
@@ -84,9 +88,9 @@ Using approximated method
 ```
 
 We can then execute the script [analyze](https://github.com/nguyenngochuy91/Relevant-Operon/blob/master/analyze.py) to compare the runtime, deletion, duplication and split count
-of our 2 method. The result is store in folder *analysis*, it contains file: Time(log10)Plot.png (running time in log10 scale), 3 graph file for pairwise event count, 3 graph file for event count versus reference gene block.
+of our 2 method. The result is store in folder *output*, by default it contains file: Time(log10)Plot.png (running time in log10 scale), 3 graph file for pairwise event count, 3 graph file for event count versus reference gene block, and the difference between naive and approx method.
 ```bash
-./analyze.py -n result_naive/E_Coli/ -a result_approx/E_Coli/ -b ./E_Coli/gene_block_names_and_genes.txt
+./analyze.py -n result_naive/E_Coli/ -a result_approx/E_Coli/ -b ./E_Coli/gene_block_names_and_genes.txt -o analysis
 ```
 ```
 usage: analyze.py [-h] [--naiveInput NAIVEINPUT] [--approxInput APPROXINPUT]

@@ -15,11 +15,13 @@ def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--naiveInput","-n",help="naive directory (either time or result)",default ="result_naive/E_Coli/" )
     parser.add_argument("--approxInput","-a",help="aprrox directory (either time or result)",default = "result_approx/E_Coli/")
+    parser.add_argument("--ILPInput","-i",help="ILP directory (either time or result)",default ="result_approx_ILP/E_Coli/" )
+    parser.add_argument("--LPInput","-l",help="LP directory (either time or result)",default = "result_approx_LP/E_Coli/")
     parser.add_argument("--geneBlock","-b",help="gene_block_names_and_genes.txt file",default = "./E_Coli/gene_block_names_and_genes.txt")
 #    parser.add_argument("--isTime","-t",help="making graph for time (Y or N)",default = "N") 
 #    parser.add_argument("--isReconstruction","-r",help="making graph for reconstruction (Y or N)",default = "N")  
-#    parser.add_argument("-o", "--output", default='graph',
-#                help="graph file")                                
+    parser.add_argument("-o", "--output", default='analysis',
+                help="graph file")                                
     return parser.parse_args()
     
 ###############################################################################
@@ -88,6 +90,21 @@ def computePairWiseDistance(dictionary,geneSet):
             pairWiseDistance[1]+= dup
             pairWiseDistance[2]+=split
     return pairWiseDistance,distance   
+    
+def computeDistanceVSILP(dictionary1,dictionary2):
+    pairWiseDistance = [0,0,0]
+    distance = [0,0,0]
+    myList   = list(dictionary.keys())
+#    print (dictionary)
+    for i in range(len(myList)-1):
+        currentGeneBlock1 = dictionary1[myList[i]]
+        currentGeneBlock2 = dictionary2[myList[i]]
+        deletion     = computeDeletion(currentGeneBlock1,currentGeneBlock2)
+        split        = computeSplit(currentGeneBlock1,currentGeneBlock2)
+        distance[0] += deletion
+        distance[2] += split
+
+    return pairWiseDistance,distance      
 ###############################################################################
 ## parse data from the 3 input file
 ###############################################################################
@@ -129,7 +146,7 @@ def parseData(naiveInput,approxInput,geneBlock):
 ## Explore data
 ###############################################################################
 # given x,y data, draw 1 figure and save it
-def drawOne(x,operonName,dictionary,name,index,indices,isTime,directory):
+def drawOne(x,operonName,dictionary,name,index,indices,isTime,directory,labelTop,labelBot):
     plt.figure()
     plt.title(name.split()[0])
     if index!=None: 
@@ -151,8 +168,8 @@ def drawOne(x,operonName,dictionary,name,index,indices,isTime,directory):
     plt.axvline(x=indices[geneIndices[0]],color='k',label = "Number of genes in the operon")
     for i in geneIndices[1:]:
         plt.axvline(x=indices[i],color='k')
-    plt.scatter(x, naiveData, s= 20,c="r",label="Naive")
-    plt.scatter(x, approxData, s=20,c="b",label="Approx")
+    plt.scatter(x, naiveData, s= 20,c="r",label=labelTop)
+    plt.scatter(x, approxData, s=20,c="b",label=labelBot)
         
 #    plt.plot(x, differences, 'g-o',label="Differences")
 #    print (differences)
@@ -189,7 +206,7 @@ def drawOne(x,operonName,dictionary,name,index,indices,isTime,directory):
         
         
 # given x,y data, draw 1 figure and save it
-def drawDifference(x,operonName,dictionary,name,index,indices,isTime,directory):
+def drawDifference(x,operonName,dictionary,name,index,indices,isTime,directory,label):
     plt.figure()
     plt.title(name.split()[0]+"Differences")
     if index!=None: 
@@ -204,7 +221,7 @@ def drawDifference(x,operonName,dictionary,name,index,indices,isTime,directory):
     for i in range(len(naiveData)):
         differences.append(naiveData[i]-approxData[i])
         info.append([operonName[i],naiveData[i]-approxData[i]])
-    print (info)
+#    print (info)
     print ()
     # change xticks
     geneIndices = sorted(indices.keys())
@@ -215,7 +232,7 @@ def drawDifference(x,operonName,dictionary,name,index,indices,isTime,directory):
     plt.axvline(x=indices[geneIndices[0]],color='k',label = "Number of genes in the operon")
     for i in geneIndices[1:]:
         plt.axvline(x=indices[i],color='k')
-    plt.scatter(x, differences, s= 20,c="black",label="Differences(Naive - Approx)")
+    plt.scatter(x, differences, s= 20,c="black",label=label)
         
 #    plt.plot(x, differences, 'g-o',label="Differences")
 #    print (differences)
@@ -252,7 +269,7 @@ def drawDifference(x,operonName,dictionary,name,index,indices,isTime,directory):
     return differences
     
 #
-def drawDifferenceSum(x,operonName,dictionary,name,index,indices,isTime,directory,differences):
+def drawDifferenceSum(x,operonName,dictionary,name,index,indices,isTime,directory,differences,label):
     plt.figure()
     plt.title(name.split()[0]+"SumDifferences")
     # change xticks
@@ -264,7 +281,7 @@ def drawDifferenceSum(x,operonName,dictionary,name,index,indices,isTime,director
     plt.axvline(x=indices[geneIndices[0]],color='k',label = "Number of genes in the operon")
     for i in geneIndices[1:]:
         plt.axvline(x=indices[i],color='k')
-    plt.scatter(x, differences, s= 20,c="black",label="Differences(Naive - Approx)")
+    plt.scatter(x, differences, s= 20,c="black",label=label)
         
 #    plt.plot(x, differences, 'g-o',label="Differences")
 #    print (differences)
@@ -301,30 +318,32 @@ def drawDifferenceSum(x,operonName,dictionary,name,index,indices,isTime,director
 
     
 # given dictionary, draw out figures 
-def drawAll(dictionary,isTime,directory,field):
+def drawAll(dictionary,isTime,directory,field,label,labelTop,labelBot):
     x = [i for i in range(len(dictionary))]
     operonName = sorted([key for key in dictionary],key = lambda operon: len(dictionary[operon]["genes"]))
     indices    = {}
     for i in range(len(operonName)):
         operon = operonName[i]
         indices[len(dictionary[operon]["genes"])]=i
-#    print (indices)
+    output = [[0,0,0] for operon in operonName]
     if not isTime:
         graphName  = ["DeletionEvents","DuplicationEvents","SplitEvents"]
         differences = [0]*len(operonName)
         # plot with color, and legend
         # plot the deletion cost
         for index in range(3):
-            drawOne(x,operonName,dictionary,field+graphName[index],index,indices,isTime,directory)
-            dif = drawDifference(x,operonName,dictionary,field+graphName[index],index,indices,isTime,directory)
+            drawOne(x,operonName,dictionary,field+graphName[index],index,indices,isTime,directory,labelTop,labelBot)
+            dif = drawDifference(x,operonName,dictionary,field+graphName[index],index,indices,isTime,directory,label)
 #            print (320,dif)
+            
             for i in range(len(operonName)):
                 differences[i]+=dif[i]
-        drawDifferenceSum(x,operonName,dictionary,"reference",index,indices,isTime,directory,differences)
+                output[i][index] += dif[i]
+        drawDifferenceSum(x,operonName,dictionary,"reference",index,indices,isTime,directory,differences,label)
     else:
-        drawOne(x,operonName,dictionary,"Time(log10)",None,indices,isTime,directory)
-        drawDifference(x,operonName,dictionary,"Time(log10)",None,indices,isTime,directory)
-    return None
+        drawOne(x,operonName,dictionary,"Time(log10)",None,indices,isTime,directory,labelTop,labelBot)
+        output = drawDifference(x,operonName,dictionary,"Time(log10)",None,indices,isTime,directory,label)
+    return operonName,output
     
 ###############################################################################
 ## Main program
@@ -333,20 +352,65 @@ if __name__ == "__main__":
     args        = parse_args()
     naiveInput  = args.naiveInput
     approxInput = args.approxInput
-#    output_file = args.output
+    ILPInput    = args.ILPInput
+    LPInput     = args.LPInput
+    output_file = args.output
     geneBlock   = args.geneBlock
 
-    # parse object
-    dictionary  = parseData(naiveInput,approxInput,geneBlock)
+    # parse object for naive and approx
+    dictionary1  = parseData(naiveInput,approxInput,geneBlock)
     # draw graph
-    analysis = "analysis"
+    analysis = output_file+"NaiveApproxReference"
     try:
-        os.mkdir("analysis")
+        os.mkdir(analysis)
     except:
         print ("directory analysis is already created")
     print ("Time")
-    drawAll(dictionary["time"],True,analysis,None)
+    drawAll(dictionary1["time"],True,analysis,None,"Differences(Naive - Approx)","Naive","Approx")
 #    drawAll(dictionary["pairWiseDistance"],False,analysis,"pairWise")
     print ("Events")
-    drawAll(dictionary["referenceDistance"],False,analysis,"reference")
+    drawAll(dictionary1["referenceDistance"],False,analysis,"reference","Differences(Naive - Approx)","Naive","Approx")
     
+    # compare ILP and naive
+    dictionary2  = parseData(naiveInput,ILPInput,geneBlock)
+    # draw graph
+    analysis = output_file+"NaiveILPReference"
+    try:
+        os.mkdir(analysis)
+    except:
+        print ("directory analysis is already created")
+    print ("Time")
+    operonName,timeDifferencesNaiveILP = drawAll(dictionary2["time"],True,analysis,None,"Differences(Naive - ILP)","Naive","ILP")
+#    drawAll(dictionary["pairWiseDistance"],False,analysis,"pairWise")
+    print ("Events")
+    operonName,differencesNaiveILP = drawAll(dictionary2["referenceDistance"],False,analysis,"reference","Differences(Naive - ILP)","Naive","ILP")
+    
+    # compare ILP and approx
+    dictionary3  = parseData(approxInput,ILPInput,geneBlock)
+    # draw graph
+    analysis = output_file+"ApproxILPReference"
+    try:
+        os.mkdir(analysis)
+    except:
+        print ("directory analysis is already created")
+    print ("Time")
+    operonName,timeDifferencesApproxILP = drawAll(dictionary3["time"],True,analysis,None,"Differences(Approx - ILP)","Approx","ILP")
+#    drawAll(dictionary["pairWiseDistance"],False,analysis,"pairWise")
+    print ("Events")
+    operonName,differencesApproxILP = drawAll(dictionary3["referenceDistance"],False,analysis,"reference","Differences(Approx - ILP)","Approx","ILP")
+    
+    print (differencesNaiveILP)
+    print ("**************************")
+    print (differencesApproxILP)
+    
+    dictionary4 = {}
+    for index,operon in enumerate(operonName):
+        dictionary4[operon] = {"naive":differencesNaiveILP[index],"approx":differencesApproxILP[index]}
+        dictionary4[operon]["genes"] = dictionary1["referenceDistance"][operon]["genes"]
+    analysis = output_file+ "NaiveILPvsApproxILP"
+    try:
+        os.mkdir(analysis)
+    except:
+        print ("directory analysis is already created")    
+    print ("Events")
+    drawAll(dictionary4,False,analysis,"reference","Differences(NaiveILP - ApproxILP)","NaiveILP","ApproxILP")

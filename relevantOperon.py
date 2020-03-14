@@ -124,15 +124,15 @@ if __name__ == '__main__':
         except:
             print ("visualization directory is already created" )
         res = traverseAll(new_result)
-        print (res)
+#        print (res)
         # go through all the reconstruction ancestral file and create a pdf visualization of them, using the group text to color group
         treeFile = tree_dir+"out_tree.nwk"
-        print (204)
+#        print (204)
         for file in res:
             operon = file.split('/')[-1]
             outfile = visualization+operon
             cmd11 = './visualize.py -i {} -g {} -o {} -t {}'.format(file,group,outfile,treeFile)
-            print (cmd11)
+#            print (cmd11)
             os.system(cmd11)        
 
     else:
@@ -175,15 +175,15 @@ if __name__ == '__main__':
         except:
             print ("visualization directory is already created" )
         res = traverseAll(new_result)
-        print (res)
+#        print (res)
         # go through all the reconstruction ancestral file and create a pdf visualization of them, using the group text to color group
         treeFile = tree_dir+"out_tree.nwk"
-        print (204)
+#        print (204)
         for file in res:
             operon = file.split('/')[-1]
             outfile = visualization+operon
             cmd11 = './visualize.py -i {} -g {} -o {} -t {}'.format(file,group,outfile,treeFile)
-            print (cmd11)
+#            print (cmd11)
             os.system(cmd11)        
 
 

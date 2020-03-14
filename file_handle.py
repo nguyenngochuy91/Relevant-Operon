@@ -1,13 +1,13 @@
+
 #!/usr/bin/env python
 ''' Author  : Huy Nguyen
     Program : Directory handling, file parsing and writing
     Start   : 05/04/2016
     End     : 05/05/2016
 '''
-import os
+import os,sys
 import argparse
-import time
-import uuid
+
 
 ###############################################################################
 ## Helper function to parse arguments, check directoring, ...
@@ -61,18 +61,16 @@ def parsing(file):
     mapping ={}
     genomes={}
     myfile = open(file,'r')
+    line = myfile.readline()
+    mylist= line.split('\t')[:-1]
+    for item in mylist:
+        tupple= item.split(',')
+        mapping[tupple[1]]=tupple[0]
     for line in myfile.readlines():
-        if line[0]!='N':
-            mylist= line.split('\t')[:-1]
-            for item in mylist:
-                tupple= item.split(',')
-                mapping[tupple[1]]=tupple[0]
-                # print (mapping)
-        else:
-            item = line.split(':')
-            name = item[0]
-            gene_blocks= item[1].split('\n')[0]
-            genomes[name]=gene_blocks
+        item = line.split(':')
+        name = item[0]
+        gene_blocks= item[1].split('\n')[0]
+        genomes[name]=gene_blocks
     return (mapping,genomes)
     
 # function to write out the mapping between an alphabet letter and the gene of the operon

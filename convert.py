@@ -11,6 +11,7 @@ import argparse
 import time
 import uuid
 import json
+import pulp # interger linear programming 
 # traverse and get the file
 def traverseAll(path):
     res=[]
@@ -102,10 +103,15 @@ def toString(dic,map_code,f,timeDictionary):
     wholestring+=map_code
     newWhole   = map_code 
     accumulate = 0
-    print (dic)
+    ILPString = ""
+    timeILP = 0
+    LPString = ""
+    timeLP  = 0
     for genome in dic:
         whole = genome + ':'
         string= genome + ':' # the string to be written
+        LPString += genome +":"
+        ILPString += genome +":"
         substring = ''
         flag = False # check if it has a gene block
         for key in dic[genome]:
@@ -128,29 +134,47 @@ def toString(dic,map_code,f,timeDictionary):
         if flag:
             string += substring[:-1] # only add if there is a gene block
 #            print (130,string)
-            blocks = substring[:-1].split("|")
+            blocks = set(substring[:-1].split("|"))
             C= set()
             for block in blocks:
                 C.add(block)
-            print ("C",C)
+#            print ("C",C)
             start = time.time()
             # solve using approx
             block = approxSolve(S,C)
-#            print (141,"approx",d)
             stop = time.time()
             accumulate+= (stop-start)/1000
             if check(block):
                 whole+="|".join(block)
             else:
                 whole+=""
-            print (152,whole)
+                
+            start = time.time()
+            ILPBlock = ILPSolve(blocks)
+            stop = time.time()
+            timeILP+= (stop-start)/1000
+            if check(ILPBlock):
+                ILPString += "|".join(ILPBlock)
+            
+            start = time.time()
+            LPBlock = LPSolve(blocks)
+            stop = time.time()
+            timeLP+= (stop-start)/1000
+            if check(LPBlock):
+                LPString += "|".join(LPBlock)
+#            print ("S: {}, C: {} \napproxBlock: {} \nILPBlock: {} \nLPBlock: {}\n".format(S,C,block,ILPBlock,LPBlock))
+
         string += '\n'
         wholestring += string
         whole+='\n'
         newWhole+=whole
-    timeDictionary[f]=accumulate
+        LPString+= "\n"
+        ILPString += "\n"
+    timeDictionary["approx"][f]=accumulate
+    timeDictionary["ILP"][f]=timeILP
+    timeDictionary["LP"][f]=timeLP
 #    print (timeDictionary)
-    return wholestring,newWhole
+    return wholestring,newWhole,ILPString,LPString
 def check(block):
     for b in block:
         if len(b)>=2:
@@ -177,6 +201,42 @@ def approxSolve(S,C):
             cover.update(set(toAdd))
             C.remove(toAdd)
     return res
+    
+# solve using integer programing
+def ILPSolve(C):
+    S = set()
+    for block in C:
+        S.update(set(block))
+    problem = pulp.LpProblem("Relevant Gene Block Integer", pulp.LpMinimize)
+    # create a binary variable to state that a block is being used
+    x = pulp.LpVariable.dicts("block",C,lowBound= 0, upBound= 1, cat = pulp.LpInteger)
+    problem += sum([x[block] for block in C])
+    # ensure that each gene in S is cover
+    for gene in S:
+        problem += sum(x[block] for block in C if gene in block) >=1, gene
+    problem.solve()
+    return [block for block in C if x[block].value() == 1.0]
+# solve using relaxation
+def LPSolve(C):
+    S = set()
+    for block in C:
+        S.update(set(block))
+    problem = pulp.LpProblem("Relevant Gene Block Integer", pulp.LpMinimize)
+    # create a binary variable to state that a block is being used
+    x = pulp.LpVariable.dicts("block",C,lowBound= 0, upBound= 1, cat = pulp.LpContinuous)
+    problem += sum([x[block] for block in C])
+    # ensure that each gene in S is cover
+    for gene in S:
+        problem += sum(x[block] for block in C if gene in block) >=1, gene
+    problem.solve()
+    maxCount = 0
+    for gene in S:
+        count = 0
+        for block in C:
+            if gene in block:
+                count +=1
+        maxCount = max(maxCount,count)
+    return [block for block in C if x[block].value() >= 1/maxCount]    
 if __name__ == "__main__":
 
     start = time.time()
@@ -186,14 +246,31 @@ if __name__ == "__main__":
     outputsession = args.OutputDirectory
     res = traverseAll(args.OperonDataDirectory)
     # make a dictionary to compare 
-    timeDictionary= {}
+    timeDictionary= {"approx":{},"ILP":{},"LP":{}}
+    parentDir = outputsession.split("/")
+    species = parentDir[-3]
+    myDir = "/".join(parentDir[:-3])
+    ILPDir =  "/".join(parentDir[:-3])+'_ILP/'+species
+    LPDir = "/".join(parentDir[:-3])+'_LP/'+species
+    try:
+        os.mkdir("/".join(parentDir[:-3])+'_ILP/')
+        os.mkdir(ILPDir)
+        os.mkdir(ILPDir+"/new_result/")
+    except:
+        print ("Error 286")
+    try:
+        os.mkdir("/".join(parentDir[:-3])+'_LP/')
+        os.mkdir(LPDir)
+        os.mkdir(LPDir+"/new_result/")
+    except:
+        print ("Error 291")    
     for r in res:
         root,f = os.path.split(r)
 #        print (root)
         result= toDict(r)
 #        print (result)
         # compute both
-        wholestring,whole = toString(result[0],result[1],f,timeDictionary)
+        wholestring,whole,ILPString,LPString = toString(result[0],result[1],f,timeDictionary)
 #        print (timeDictionary)
         if approx == "N":
             try:
@@ -208,12 +285,24 @@ if __name__ == "__main__":
                 os.mkdir(outputsession)
             except:
                 pass
+    
             outfile = open(outputsession+'/'+f,'w')
             outfile.write(whole)
             outfile.close()
-        
+            
+            outfile = open(ILPDir+"/new_result/"+f,'w')
+            outfile.write(ILPString)
+            outfile.close()
+            outfile = open(LPDir+"/new_result/"+f,'w')
+            outfile.write(LPString)
+            outfile.close()
     if approx == "Y":
         root = "/".join(root.split("/")[:-1])
         with open(root+"/time.txt","w") as outfile:
-            json.dump(timeDictionary,outfile)
-        print (time.time() - start)
+            json.dump(timeDictionary["approx"],outfile)
+
+        with open(myDir+'_ILP/'+species+"/time.txt","w") as outfile:
+            json.dump(timeDictionary["ILP"],outfile)
+
+        with open(LPDir+"/time.txt","w") as outfile:
+            json.dump(timeDictionary["LP"],outfile)
