@@ -252,18 +252,19 @@ if __name__ == "__main__":
     myDir = "/".join(parentDir[:-3])
     ILPDir =  "/".join(parentDir[:-3])+'_ILP/'+species
     LPDir = "/".join(parentDir[:-3])+'_LP/'+species
-    try:
-        os.mkdir("/".join(parentDir[:-3])+'_ILP/')
-        os.mkdir(ILPDir)
-        os.mkdir(ILPDir+"/new_result/")
-    except:
-        print ("Error 286")
-    try:
-        os.mkdir("/".join(parentDir[:-3])+'_LP/')
-        os.mkdir(LPDir)
-        os.mkdir(LPDir+"/new_result/")
-    except:
-        print ("Error 291")    
+    if approx == "Y":
+        try:
+            os.mkdir("/".join(parentDir[:-3])+'_ILP/')
+            os.mkdir(ILPDir)
+            os.mkdir(ILPDir+"/new_result/")
+        except:
+            print ("Error 286")
+        try:
+            os.mkdir("/".join(parentDir[:-3])+'_LP/')
+            os.mkdir(LPDir)
+            os.mkdir(LPDir+"/new_result/")
+        except:
+            print ("Error 291")    
     for r in res:
         root,f = os.path.split(r)
 #        print (root)

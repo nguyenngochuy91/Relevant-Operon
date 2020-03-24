@@ -11,6 +11,7 @@ from collections import Counter
 import numpy as np
 from file_handle import traverseAll,parsing
 import os
+import matplotlib.ticker as ticker
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--naiveInput","-n",help="naive directory (either time or result)",default ="result_naive/E_Coli/" )
@@ -94,7 +95,7 @@ def computePairWiseDistance(dictionary,geneSet):
 def computeDistanceVSILP(dictionary1,dictionary2):
     pairWiseDistance = [0,0,0]
     distance = [0,0,0]
-    myList   = list(dictionary.keys())
+    myList   = list(dictionary1.keys())
 #    print (dictionary)
     for i in range(len(myList)-1):
         currentGeneBlock1 = dictionary1[myList[i]]
@@ -165,11 +166,14 @@ def drawOne(x,operonName,dictionary,name,index,indices,isTime,directory,labelTop
     for gene in geneIndices:
         flipD[indices[gene]] = gene
     plt.xticks(x,["{} ({})".format(operonName[i][:3],flipD[i]) if i in flipD else operonName[i][:3]  for i in range(len(operonName))],rotation='vertical',fontsize = 10)
-    plt.axvline(x=indices[geneIndices[0]],color='k',label = "Number of genes in the operon")
+    # plt.axvline(x=indices[geneIndices[0]],color='k',label = "Number of genes in the operon")
+    plt.axvline(x=indices[geneIndices[0]],color='k')
     for i in geneIndices[1:]:
         plt.axvline(x=indices[i],color='k')
-    plt.scatter(x, naiveData, s= 20,c="r",label=labelTop)
-    plt.scatter(x, approxData, s=20,c="b",label=labelBot)
+    # plt.scatter(x, naiveData, s= 20,c="r",label=labelTop)
+    plt.scatter(x, naiveData, s= 20,c="r")
+    # plt.scatter(x, approxData, s=20,c="b",label=labelBot)
+    plt.scatter(x, approxData, s=20,c="b")
         
 #    plt.plot(x, differences, 'g-o',label="Differences")
 #    print (differences)
@@ -177,7 +181,7 @@ def drawOne(x,operonName,dictionary,name,index,indices,isTime,directory,labelTop
     plt.xlabel('Operon Name')
     plt.ylabel(name)
     # Place a legend to the right of the plot
-    plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0.)
+    # plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0.)
     # resize the plot
     
     plt.xticks(range(len(dictionary))) # add loads of ticks
@@ -229,10 +233,12 @@ def drawDifference(x,operonName,dictionary,name,index,indices,isTime,directory,l
     for gene in geneIndices:
         flipD[indices[gene]] = gene
     plt.xticks(x,["{} ({})".format(operonName[i][:3],flipD[i]) if i in flipD else operonName[i][:3]  for i in range(len(operonName))],rotation='vertical',fontsize = 10)
-    plt.axvline(x=indices[geneIndices[0]],color='k',label = "Number of genes in the operon")
+    # plt.axvline(x=indices[geneIndices[0]],color='k',label = "Number of genes in the operon")
+    plt.axvline(x=indices[geneIndices[0]],color='k')
     for i in geneIndices[1:]:
         plt.axvline(x=indices[i],color='k')
-    plt.scatter(x, differences, s= 20,c="black",label=label)
+    # plt.scatter(x, differences, s= 20,c="black",label=label)
+    plt.scatter(x, differences, s= 20,c="black")
         
 #    plt.plot(x, differences, 'g-o',label="Differences")
 #    print (differences)
@@ -240,7 +246,7 @@ def drawDifference(x,operonName,dictionary,name,index,indices,isTime,directory,l
     plt.xlabel('Operon Name')
     plt.ylabel(name)
     # Place a legend to the right of the plot
-    plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0.)
+    # plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0.)
     # resize the plot
     
     plt.xticks(range(len(dictionary))) # add loads of ticks
@@ -261,6 +267,7 @@ def drawDifference(x,operonName,dictionary,name,index,indices,isTime,directory,l
     plt.margins(0.1)
     # Tweak spacing to prevent clipping of tick-labels
     plt.subplots_adjust(bottom=0.1)
+    
     # save somewhere we want lol
     if isTime=="Y":
         plt.savefig(directory+"/{}DifferencesPlot".format(name),bbox_inches='tight',quality=100,dpi=500)
@@ -278,18 +285,19 @@ def drawDifferenceSum(x,operonName,dictionary,name,index,indices,isTime,director
     for gene in geneIndices:
         flipD[indices[gene]] = gene
     plt.xticks(x,["{} ({})".format(operonName[i][:3],flipD[i]) if i in flipD else operonName[i][:3]  for i in range(len(operonName))],rotation='vertical',fontsize = 10)
-    plt.axvline(x=indices[geneIndices[0]],color='k',label = "Number of genes in the operon")
+    # plt.axvline(x=indices[geneIndices[0]],color='k',label = "Number of genes in the operon")
+    plt.axvline(x=indices[geneIndices[0]],color='k')
     for i in geneIndices[1:]:
         plt.axvline(x=indices[i],color='k')
-    plt.scatter(x, differences, s= 20,c="black",label=label)
-        
+    # plt.scatter(x, differences, s= 20,c="black",label=label)
+    plt.scatter(x, differences, s= 20,c="black")   
 #    plt.plot(x, differences, 'g-o',label="Differences")
 #    print (differences)
 #        plt.plot(operonName, geneData, 'g-o',label="Rep3")
     plt.xlabel('Operon Name')
     plt.ylabel(name)
     # Place a legend to the right of the plot
-    plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0.)
+    # plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0.)
     # resize the plot
     
     plt.xticks(range(len(dictionary))) # add loads of ticks
@@ -339,11 +347,173 @@ def drawAll(dictionary,isTime,directory,field,label,labelTop,labelBot):
             for i in range(len(operonName)):
                 differences[i]+=dif[i]
                 output[i][index] += dif[i]
-        drawDifferenceSum(x,operonName,dictionary,"reference",index,indices,isTime,directory,differences,label)
+        drawDifferenceSum(x,operonName,dictionary,labelTop+labelBot+"reference",index,indices,isTime,directory,differences,label)
     else:
-        drawOne(x,operonName,dictionary,"Time(log10)",None,indices,isTime,directory,labelTop,labelBot)
-        output = drawDifference(x,operonName,dictionary,"Time(log10)",None,indices,isTime,directory,label)
+        drawOne(x,operonName,dictionary,labelTop+labelBot+"Time(log10)",None,indices,isTime,directory,labelTop,labelBot)
+        output = drawDifference(x,operonName,dictionary,labelTop+labelBot+"Time(log10)",None,indices,isTime,directory,label)
     return operonName,output
+
+
+## draw 3 method in 1 graph
+# given x,y data, draw 1 figure and save it
+def drawThreeInOne(x,operonName,dictionary,name,index,indices,isTime,directory,labelTop,labelMid,labelBot):
+    plt.figure()
+    plt.title(name.split()[0])
+    if index!=None: 
+#        print (dictionary)
+        naiveData  = [dictionary[operon]["naive"][index] for operon in operonName]
+        approxData = [dictionary[operon]["approx"][index] for operon in operonName]
+        ILPData = [dictionary[operon]["ILP"][index] for operon in operonName]
+    else:
+        naiveData  = np.log10([dictionary[operon]["naive"] for operon in operonName])
+        approxData = np.log10([dictionary[operon]["approx"] for operon in operonName])  
+        ILPData = np.log10([dictionary[operon]["ILP"] for operon in operonName])  
+    differences =[]
+    for i in range(len(naiveData)):
+        differences.append(naiveData[i]-approxData[i])
+    # change xticks
+    geneIndices = sorted(indices.keys())
+    flipD =  {}
+    for gene in geneIndices:
+        flipD[indices[gene]] = gene
+    plt.xticks(x,["{} ({})".format(operonName[i][:3],flipD[i]) if i in flipD else operonName[i][:3]  for i in range(len(operonName))],rotation='vertical',fontsize = 10)
+    plt.axvline(x=indices[geneIndices[0]],color='k',label = "Number of genes in the operon")
+    ax = plt.axes()
+    # if not isTime:
+    #     ax.yaxis.set_major_locator(ticker.MultipleLocator(10))
+    #     ax.yaxis.set_minor_locator(ticker.MultipleLocator(2))
+    # plt.axvline(x=indices[geneIndices[0]],color='k')
+    for i in geneIndices[1:]:
+        plt.axvline(x=indices[i],color='k')
+    plt.scatter(x, naiveData, s= 20,c="r",label=labelTop,marker = "^")
+    # plt.scatter(x, naiveData, s= 20,c="r",marker = "^")
+    plt.scatter(x, approxData, s=20,c="b",label=labelBot,marker = "o")
+    # plt.scatter(x, approxData, s=20,c="b")
+    plt.scatter(x, ILPData, s=20,c="g",label=labelMid,marker = "x")
+#    plt.plot(x, differences, 'g-o',label="Differences")
+#    print (differences)
+#        plt.plot(operonName, geneData, 'g-o',label="Rep3")
+    plt.xlabel('Operon Name')
+    plt.ylabel(name)
+    # Place a legend to the right of the plot
+    plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0.)
+    # resize the plot
+    
+    plt.xticks(range(len(dictionary))) # add loads of ticks
+    plt.grid()
+    
+    plt.gca().margins(x=0)
+    plt.gcf().canvas.draw()
+    tl = plt.gca().get_xticklabels()
+    maxsize = max([t.get_window_extent().width for t in tl])
+    m = 0.2 # inch margin
+    s = maxsize/plt.gcf().dpi*len(dictionary)+2*(m+1)
+    margin = m/plt.gcf().get_size_inches()[0]
+    
+    plt.gcf().subplots_adjust(left=margin, right=1.-margin)
+    plt.gcf().set_size_inches(s, plt.gcf().get_size_inches()[1])        
+    
+    # Pad margins so that markers don't get clipped by the axes
+    plt.margins(0.1)
+    # Tweak spacing to prevent clipping of tick-labels
+    plt.subplots_adjust(bottom=0.1)
+    # save somewhere we want lol
+    plt.savefig(directory+"/{}Plot".format(name),bbox_inches='tight',quality=100,dpi=500)
+        
+        
+# draw sum
+def drawSum(x,operonName,dictionary,name,indices,isTime,directory,labelTop,labelMid,labelBot):
+    plt.figure()
+    plt.title(name.split()[0])
+    naiveData = [0]*len(operonName)
+    approxData = [0]*len(operonName)
+    ILPData = [0]*len(operonName)
+    for index in range(3):
+        for j,operon in enumerate(operonName):
+            
+            naiveData[j] += dictionary[operon]["naive"][index]
+            approxData[j] +=dictionary[operon]["approx"][index]
+            ILPData[j]+= dictionary[operon]["ILP"][index]
+    differences =[]
+    for i in range(len(naiveData)):
+        differences.append(naiveData[i]-approxData[i])
+    # change xticks
+    geneIndices = sorted(indices.keys())
+    flipD =  {}
+    for gene in geneIndices:
+        flipD[indices[gene]] = gene
+    plt.xticks(x,["{} ({})".format(operonName[i][:3],flipD[i]) if i in flipD else operonName[i][:3]  for i in range(len(operonName))],rotation='vertical',fontsize = 10)
+    plt.axvline(x=indices[geneIndices[0]],color='k',label = "Number of genes in the operon")
+    # plt.axvline(x=indices[geneIndices[0]],color='k')
+    for i in geneIndices[1:]:
+        plt.axvline(x=indices[i],color='k')
+    plt.scatter(x, naiveData, s= 20,c="r",label=labelTop,marker = "^")
+    # plt.scatter(x, naiveData, s= 20,c="r",marker = "^")
+    plt.scatter(x, approxData, s=20,c="b",label=labelBot,marker = "o")
+    # plt.scatter(x, approxData, s=20,c="b")
+    plt.scatter(x, ILPData, s=20,c="g",label=labelMid,marker = "x")
+    ax = plt.axes()
+    # if not isTime:
+    #     ax.yaxis.set_major_locator(ticker.MultipleLocator(10))
+    #     ax.yaxis.set_minor_locator(ticker.MultipleLocator(2))        
+#    plt.plot(x, differences, 'g-o',label="Differences")
+#    print (differences)
+#        plt.plot(operonName, geneData, 'g-o',label="Rep3")
+    plt.xlabel('Operon Name')
+    plt.ylabel(name)
+    # Place a legend to the right of the plot
+    plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0.)
+    # resize the plot
+    
+    plt.xticks(range(len(dictionary))) # add loads of ticks
+    plt.grid()
+    
+    plt.gca().margins(x=0)
+    plt.gcf().canvas.draw()
+    tl = plt.gca().get_xticklabels()
+    maxsize = max([t.get_window_extent().width for t in tl])
+    m = 0.2 # inch margin
+    s = maxsize/plt.gcf().dpi*len(dictionary)+2*(m+1)
+    margin = m/plt.gcf().get_size_inches()[0]
+    
+    plt.gcf().subplots_adjust(left=margin, right=1.-margin)
+    plt.gcf().set_size_inches(s, plt.gcf().get_size_inches()[1])        
+    
+    # Pad margins so that markers don't get clipped by the axes
+    plt.margins(0.1)
+    # Tweak spacing to prevent clipping of tick-labels
+    plt.subplots_adjust(bottom=0.1)
+    # save somewhere we want lol
+    plt.savefig(directory+"/{}Plot".format(name),bbox_inches='tight',quality=100,dpi=500)
+
+## draw 3 method in the same graph for time and events
+def drawAllThreeMethods(dictionary,isTime,directory,field,labelTop,labelMid,labelBot):
+    x = [i for i in range(len(dictionary))]
+    operonName = sorted([key for key in dictionary],key = lambda operon: len(dictionary[operon]["genes"]))
+    indices    = {}
+    for i in range(len(operonName)):
+        operon = operonName[i]
+        indices[len(dictionary[operon]["genes"])]=i
+    # output = [[0,0,0] for operon in operonName]
+    if not isTime:
+        graphName  = ["DeletionEvents","DuplicationEvents","SplitEvents"]
+        # differences = [0]*len(operonName)
+        # plot with color, and legend
+        # plot the deletion cost
+        for index in range(3):
+            drawThreeInOne(x,operonName,dictionary,labelTop+labelMid+labelBot+field+graphName[index],index,indices,isTime,directory,labelTop,labelMid,labelBot)
+        drawSum(x,operonName,dictionary,"TotalSum"+labelTop+labelMid+labelBot+field,indices,isTime,directory,labelTop,labelMid,labelBot)
+            # dif = drawDifference(x,operonName,dictionary,field+graphName[index],index,indices,isTime,directory,label)
+#            print (320,dif)
+            
+        #     for i in range(len(operonName)):
+        #         differences[i]+=dif[i]
+        #         output[i][index] += dif[i]
+        # drawDifferenceSum(x,operonName,dictionary,"reference",index,indices,isTime,directory,differences,label)
+    else:
+        drawThreeInOne(x,operonName,dictionary,labelTop+labelMid+labelBot+"Time(log10)",None,indices,isTime,directory,labelTop,labelMid,labelBot)
+        # output = drawDifference(x,operonName,dictionary,"Time(log10)",None,indices,isTime,directory,label)
+    return 
     
 ###############################################################################
 ## Main program
@@ -364,7 +534,7 @@ if __name__ == "__main__":
     try:
         os.mkdir(analysis)
     except:
-        print ("directory analysis is already created")
+        print ("directory {} is already created".format(analysis))
     print ("Time")
     drawAll(dictionary1["time"],True,analysis,None,"Differences(Naive - Approx)","Naive","Approx")
 #    drawAll(dictionary["pairWiseDistance"],False,analysis,"pairWise")
@@ -378,7 +548,7 @@ if __name__ == "__main__":
     try:
         os.mkdir(analysis)
     except:
-        print ("directory analysis is already created")
+        print ("directory {} is already created".format(analysis))
     print ("Time")
     operonName,timeDifferencesNaiveILP = drawAll(dictionary2["time"],True,analysis,None,"Differences(Naive - ILP)","Naive","ILP")
 #    drawAll(dictionary["pairWiseDistance"],False,analysis,"pairWise")
@@ -386,31 +556,54 @@ if __name__ == "__main__":
     operonName,differencesNaiveILP = drawAll(dictionary2["referenceDistance"],False,analysis,"reference","Differences(Naive - ILP)","Naive","ILP")
     
     # compare ILP and approx
-    dictionary3  = parseData(approxInput,ILPInput,geneBlock)
+#     dictionary3  = parseData(approxInput,ILPInput,geneBlock)
+#     # draw graph
+#     analysis = output_file+"ApproxILPReference"
+#     try:
+#         os.mkdir(analysis)
+#     except:
+#         print ("directory analysis is already created")
+#     print ("Time")
+#     operonName,timeDifferencesApproxILP = drawAll(dictionary3["time"],True,analysis,None,"Differences(Approx - ILP)","Approx","ILP")
+# #    drawAll(dictionary["pairWiseDistance"],False,analysis,"pairWise")
+#     print ("Events")
+#     operonName,differencesApproxILP = drawAll(dictionary3["referenceDistance"],False,analysis,"reference","Differences(Approx - ILP)","Approx","ILP")
+    
+#     # print (differencesNaiveILP)
+#     print ("**************************")
+#     # print (differencesApproxILP)
+    
+#     dictionary4 = {}
+#     for index,operon in enumerate(operonName):
+#         dictionary4[operon] = {"naive":differencesNaiveILP[index],"approx":differencesApproxILP[index]}
+#         dictionary4[operon]["genes"] = dictionary1["referenceDistance"][operon]["genes"]
+#     analysis = output_file+ "NaiveILPvsApproxILP"
+#     try:
+#         os.mkdir(analysis)
+#     except:
+#         print ("directory analysis is already created")    
+#     print ("Events")
+#     drawAll(dictionary4,False,analysis,"reference","Differences(NaiveILP - ApproxILP)","NaiveILP","ApproxILP")
+    # print (dictionary1)
+    # print (dictionary2)
+    dictionary5 = {"time":{},"pairWiseDistance":{},"referenceDistance":{}}
+    for operon in operonName:
+        dictionary5["referenceDistance"][operon] = {"naive":dictionary1["referenceDistance"][operon]["naive"],
+                              "approx":dictionary1["referenceDistance"][operon]["approx"],
+                              "ILP":dictionary2["referenceDistance"][operon]["approx"],
+                              "genes":dictionary1["referenceDistance"][operon]["genes"] }
+        dictionary5["time"][operon] = {"naive":dictionary1["time"][operon]["naive"],
+                              "approx":dictionary1["time"][operon]["approx"],
+                              "ILP":dictionary2["time"][operon]["approx"],
+                              "genes":dictionary1["time"][operon]["genes"] }
     # draw graph
-    analysis = output_file+"ApproxILPReference"
+    analysis = output_file+"NaiveApproxILPReference"
     try:
         os.mkdir(analysis)
     except:
-        print ("directory analysis is already created")
+        print ("directory {} is already created".format(analysis))
     print ("Time")
-    operonName,timeDifferencesApproxILP = drawAll(dictionary3["time"],True,analysis,None,"Differences(Approx - ILP)","Approx","ILP")
+    drawAllThreeMethods(dictionary5["time"],True,analysis,None,"Naive","ILP","Approximated")
 #    drawAll(dictionary["pairWiseDistance"],False,analysis,"pairWise")
     print ("Events")
-    operonName,differencesApproxILP = drawAll(dictionary3["referenceDistance"],False,analysis,"reference","Differences(Approx - ILP)","Approx","ILP")
-    
-    print (differencesNaiveILP)
-    print ("**************************")
-    print (differencesApproxILP)
-    
-    dictionary4 = {}
-    for index,operon in enumerate(operonName):
-        dictionary4[operon] = {"naive":differencesNaiveILP[index],"approx":differencesApproxILP[index]}
-        dictionary4[operon]["genes"] = dictionary1["referenceDistance"][operon]["genes"]
-    analysis = output_file+ "NaiveILPvsApproxILP"
-    try:
-        os.mkdir(analysis)
-    except:
-        print ("directory analysis is already created")    
-    print ("Events")
-    drawAll(dictionary4,False,analysis,"reference","Differences(NaiveILP - ApproxILP)","NaiveILP","ApproxILP")
+    drawAllThreeMethods(dictionary5["referenceDistance"],False,analysis,"reference","Naive","ILP","Approximated")    
